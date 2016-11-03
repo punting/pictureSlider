@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图片滚动</title>
+    <script src="js/jquery-1.11.3.js"></script>
+    <style>
+        *{margin: 0px;padding: 0px;}
+        #div1{
+            max-width:300px;
+            height:300px;
+            margin: 100px auto;
+            position: relative;
+            border: 1px solid black;
+            overflow: hidden;
+        }
+        #ull{
+            height: 300px;
+            position: absolute;
+            top: 0px;
+            /*left: 0px;*/
+            list-style: none;
+        }
+        #ull>li{
+            float:left;
+            width:300px;
+            height:300px;
+            position: relative;
+        }
+		#ull>li img{
+		  max-width:100%;
+		  max-height:100%;
+		}
+        #ull>li p{
+            box-sizing: border-box;
+            padding-top:5px;
+            width: 100%;
+            height: 40px;
+            position: absolute;
+            left: 0;
+            bottom:0;
+            color: #fff;
+            background-color: rgba(0,0,0,.5);
+            text-align: center;
+        }
+        #indexs{
+            position: absolute;
+            bottom: 10px;
+            right:10px;
+            list-style: none;
+        }
+        #indexs>li{
+            box-sizing: border-box;
+            width: 12px;
+            height: 12px;
+            float:left;
+            border: 1px solid black;
+            margin-right: 5px;
+            cursor: pointer;
+            text-indent: 200px;
+            overflow: hidden;
+            border-radius: 50%;
+        }
+        #indexs>li.active{
+            background: rosybrown;
+            color: aliceblue;
+        }
+		#pre,#next{
+            position: absolute;
+            margin-top: -10px;
+            width: 20px;
+            height: 30px;
+            font-size:50px;
+            color: #fff;
+            top:50%;
+            cursor: pointer;
+            opacity: 0;
+        }
+        #pre{
+            left:5px;
+        }
+        #next{
+            right: 5px;
+            text-align: right;
+        }
+        #pre:hover,#next:hover{
+            opacity: 1;
+            -webket-transtion:opacity 1s ease 0s;
+        }
+    </style>
+</head>
+<body>
+    <div id='div1'>
+    <ul id="ull">
+        <li><img src="img/pf-10.jpg" alt="" /><p>4444444444</p></li>
+        <li><img src="img/pf-6.jpg" alt="" /><p>111111111111</p></li>
+        <li><img src="img/pf-7.jpg" alt="" /><p>222222222222</p></li>
+        <li><img src="img/pf-8.jpg" alt="" /><p>3333333333333</p></li>
+        <li><img src="img/pf-10.jpg" alt="" /><p>4444444444</p></li>
+        <li><img src="img/pf-6.jpg" alt="" /><p>111111111111</p></li>
+    </ul>
+    <ul id="indexs">
+        <li class="active">1</li>
+        <li>2</li>
+        <li>3</li>
+        <li>4</li>
+    </ul>
+        <span id="pre"> < </span>
+        <span id="next"> > </span>
+</div>
+    <script>
+     $(function(){
+       var ad = {
+         width:$("#ull>li img")[0].offsetWidth,
+         count:$("#ull>li img").length,
+           t1:null,
+           t2:null,
+           move:function (self,n,sign) {
+               var mUl = $('#ull'),
+                L = parseFloat(mUl.css('left'));
+               mUl.css({'left':L-self.width*sign+'px','-webkit-transition':'left 500ms cubic-bezier(0.1, 0.57, 0.1, 1) 0s'});
+               $("#indexs").children('li:nth-child('+n+')').addClass("active").siblings().removeClass('active');
+           },
+           slider:function (){
+              var mUl = $('#ull'),
+                   self = this;
+               mUl.css({width:self.width*self.count+'px',left:-self.width+'px'});
+               self.t1= setInterval(function(){
+                   var n =  $("#indexs li.active").text();
+                   n=++n>=5?1:n;
+                   self.move(self,n,1);
+               },3000);
+               self.t2 = setInterval(function (){
+                   var mUl = $('#ull'),
+                       L = parseFloat(mUl.css('left'));
+                   if(parseFloat(mUl.css('left'))>=0){
+                       L = -self.width *(self.count-2);
+                       mUl.css({left:L+'px','-webkit-transition':'left 0ms ease 0s'});
+                   }else if(parseFloat(mUl.css('left')) <= -self.width *(self.count-1)){
+                       L=-self.width;
+                       mUl.css({left:L+'px','-webkit-transition':'left 0ms ease 0s'});
+                   }
+               },50)
+           },
+           getIndex:function (){
+               var self = this;
+               $("#indexs li").mouseover(function (){
+                   var mUl = $('#ull'),
+                      n = this.innerHTML;
+                   mUl.css({'left':-self.width*n+'px','-webkit-transition':'left 500ms cubic-bezier(0.1, 0.57, 0.1, 1) 0s'});
+                   $(this).addClass("active").siblings().removeClass('active');
+               });
+           },
+           getNext:function () {
+               var self =  this;
+               $('#next').click(function () {
+                    var n =  $("#indexs li.active").text();
+                   n=++n>=5?1:n;
+                   self.move(self,n,1);
+               });
+           },
+           getPre:function(){
+               var self =  this;
+               $('#pre').click(function () {
+                   var n =  $("#indexs li.active").text();
+                   n=--n<=0?4:n;
+                   self.move(self,n,-1);
+               });
+           },
+           init:function (){
+               var self = this;
+               self.slider();
+               self.getIndex();
+               self.getNext();
+               self.getPre();
+               $("#div1").mouseover(function(){
+                   clearInterval(self.t1);
+               })
+               $("#div1").mouseout(function(){
+                   self.t1= setInterval(function(){
+                       var n =  $("#indexs li.active").text();
+                       n=++n>=5?1:n;
+                       self.move(self,n,1);
+                   },3000);
+               });
+           }
+       }
+       ad.init();
+     })
+    </script>
+</body>
+</html>
